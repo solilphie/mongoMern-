@@ -9,44 +9,59 @@ const bcr = require('bcrypt');
 // @route POST api/users
 // @desc Register new user
 // @access Public
-router.post("/register", (req, res) => {
-  let { nom,prenom,categorie,type, email, password } = req.body;
-  if (!nom || !email || !password || !prenom || !categorie || !type )
-    return res.status(400).send({ msg: "Please enter all data" });
-  User.findOne({ email: email }).then((user) => {
-    if (user) return res.status(400).send({ msg: "Email alreadyexist" });
-  });
-  let newUser = new User({ prenom,nom, email, password, categorie,type });
-  bcrypt.genSalt(10, (err, salt) => {
-    if (err) throw err;
-    bcrypt.hash(newUser.password, salt, (err, hash) => {
-      if (err) throw err;
-      newUser.password = hash;
-      newUser.save().then((user) => {
-        jwt.sign(
-          { id: user.id },
-          config.get("jwtSecret"),
-          { expiresIn: config.get("tokenExpire") },
-          (err, token) => {
-            if (err) throw err;
-            res.json({
-              token,
-              user: {
-                id: user.id,
-                name: user.prenom,
-                name: user.nom,
-                email: user.email,
-                type_user: user.type,
-                categorie: user.categorie,
-              },
-            });
-          }
-        );
-      });
+const validator = require('validator');
+
+router.post('/register', async (req, res) => {
+  const { nom, prenom, categorie, type, email, password,adresse } = req.body;
+
+  if (!nom || !prenom || !categorie || !type || !email || !password || !adresse) {
+    return res.status(400).json({ error: 'Please enter all data' });
+  }
+
+  if (!validator.isEmail(email)) {
+    return res.status(400).json({ error: 'Invalid email address' });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ error: 'Email already exists' });
+    }
+
+    const newUser = new User({ nom, prenom, email, password, categorie, type,adresse });
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newUser.password, salt);
+
+    newUser.password = hashedPassword;
+
+    const savedUser = await newUser.save();
+
+    const token = jwt.sign(
+      { id: savedUser.id },
+      config.get('jwtSecret'),
+      { expiresIn: config.get('tokenExpire') }
+    );
+
+    res.json({
+      token,
+      user: {
+        id: savedUser.id,
+        name: savedUser.prenom,
+        surname: savedUser.nom,
+        email: savedUser.email,
+        type_user: savedUser.type,
+        categorie: savedUser.categorie,
+      },
     });
-  });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server Error' });
+  }
 });
 
+  
 
 router.post('/login', async (req, res) => {
   

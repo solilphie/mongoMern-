@@ -4,6 +4,7 @@ const config = require("config");
 const cors = require("cors");
 const app = express();
 const users = require("./routes/api/users");
+const posts = require("./routes/api/posts");
 // const auth = require("./routes/api/auth");
 app.use(express.json());
 app.use(cors());
@@ -15,6 +16,6 @@ mongoose
   .catch((err) => console.log(err));
 // app.use("/api/auth", auth);
 app.use("/api/users", users);
-
+app.use("/api/posts", posts);
 const port = process.env.PORT || 5001;
 app.listen(port, () => console.log(`Server running on port ${port}`));
