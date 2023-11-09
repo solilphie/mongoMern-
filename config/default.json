@@ -1,0 +1,7 @@
+
+
+{
+  "mongo_url": "mongodb://localhost:27017/tp1",
+  "jwtSecret":"jwtSecret",
+  "tokenExpire":"52222555"
+}
