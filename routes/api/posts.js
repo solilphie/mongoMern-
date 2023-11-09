@@ -36,4 +36,25 @@ router.post('/create', async (req, res) => {
   }
 });
 
+// Endpoint de suppression d'un post par son ID
+router.delete('/delete/:postId', async (req, res) => {
+  const postId = req.params.postId;
+
+  try {
+    // Supprimez le post par son ID
+    const deletedPost = await Post.findByIdAndDelete(postId);
+
+    // Si le post n'est pas trouvé, renvoyez une réponse d'erreur
+    if (!deletedPost) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Renvoyez une réponse de succès
+    res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
 module.exports = router;
