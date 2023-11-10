@@ -2,6 +2,13 @@ const router = require("express").Router();
 const config = require("config");
 const Post = require("../../models/Post");
 const jwt = require('jsonwebtoken');
+const path = require('path');
+const fs = require('fs');
+const multer = require('multer');
+// Définissez le stockage pour multer
+const storage = multer.memoryStorage(); // Stocke les fichiers en mémoire
+// Configurez multer avec le stockage
+const upload = multer({ storage: storage });
 
 // @route POST api/posts
 // @desc Register new post
@@ -51,6 +58,23 @@ router.delete('/delete/:postId', async (req, res) => {
 
     // Renvoyez une réponse de succès
     res.json({ message: 'Post deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+router.post('/DownloadPDF', upload.single('file'), (req, res) => {
+  try {
+    // Obtenez le fichier depuis req.file.buffer
+    const fileBuffer = req.file.buffer;
+    const filename = req.file.originalname
+    // Faites quelque chose avec le fichier, par exemple, enregistrez-le dans un répertoire
+    const filePath = path.join(config.get("path_file"), filename);
+    fs.writeFileSync(filePath, fileBuffer);
+
+    // Répondez au client avec une confirmation
+    res.json({ message: 'File uploaded successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server Error' });
