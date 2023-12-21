@@ -94,10 +94,10 @@ router.post('/login', async (req, res) => {
               token,
               user: {
                 id: user.id,
-                name: user.prenom, // Assurez-vous que vos propriétés sont correctes ici
+                name: user.first_name, // Assurez-vous que vos propriétés sont correctes ici
                 email: user.email,
-                type_user: user.type,
-                categorie: user.categorie,
+                type_user: user.usertypes,
+                categorie: user.categoryy,
               },
             });
           }
@@ -112,5 +112,33 @@ router.post('/login', async (req, res) => {
   }
 });
 
+
+// Route pour obtenir un utilisateur par son ID
+router.get('/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Recherche de l'utilisateur dans la base de données par ID
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    // Renvoie les détails de l'utilisateur
+    res.json({
+      id: user._id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email: user.email,
+      adress: user.adress,
+      usertypes: user.usertypes,
+      categoryy: user.categoryy,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erreur Serveur' });
+  }
+});
 
 module.exports = router;
