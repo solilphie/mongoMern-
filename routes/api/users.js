@@ -11,10 +11,10 @@ const bcr = require('bcrypt');
 // @access Public
 const validator = require('validator');
 
-router.post('/register', async (req, res) => {
-  const { nom, prenom, categorie, type, email, password,adresse } = req.body;
+router.post('/signup', async (req, res) => {
+  const { first_name, last_name, categoryy, usertypes, email, password,adress } = req.body;
 
-  if (!nom || !prenom || !categorie || !type || !email || !password || !adresse) {
+  if (!first_name || !last_name || !categoryy || !usertypes || !email || !password || !adress) {
     return res.status(400).json({ error: 'Please enter all data' });
   }
 
@@ -29,7 +29,7 @@ router.post('/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already exists' });
     }
 
-    const newUser = new User({ nom, prenom, email, password, categorie, type,adresse });
+    const newUser = new User({ last_name, first_name, email, password, categoryy, usertypes,adress });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newUser.password, salt);
@@ -48,11 +48,11 @@ router.post('/register', async (req, res) => {
       token,
       user: {
         id: savedUser.id,
-        name: savedUser.prenom,
-        surname: savedUser.nom,
+        name: savedUser.first_name,
+        surname: savedUser.last_name,
         email: savedUser.email,
-        type_user: savedUser.type,
-        categorie: savedUser.categorie,
+        type_user: savedUser.usertypes,
+        categorie: savedUser.categoryy,
       },
     });
   } catch (error) {

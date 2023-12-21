@@ -19,7 +19,7 @@ mongoose
   .catch((err) => console.log(err));
 
 // app.use("/api/auth", auth);
-app.use("/api/users", users);
+app.use("/api/user/", users);
 app.use("/api/posts", posts);
 app.use("/api/applications", applications);
 
