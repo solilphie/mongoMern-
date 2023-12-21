@@ -28,8 +28,12 @@ router.post('/signup', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ error: 'Email already exists' });
     }
-
-    const newUser = new User({ last_name, first_name, email, password, categoryy, usertypes,adress });
+    const token = jwt.sign(
+      { email, first_name, last_name },
+      config.get('jwtSecret'),
+      { expiresIn: config.get('tokenExpire') }
+    );
+    const newUser = new User({ last_name, first_name, email, password, categoryy, usertypes,adress,token });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newUser.password, salt);
@@ -38,11 +42,11 @@ router.post('/signup', async (req, res) => {
 
     const savedUser = await newUser.save();
 
-    const token = jwt.sign(
-      { id: savedUser.id },
-      config.get('jwtSecret'),
-      { expiresIn: config.get('tokenExpire') }
-    );
+    // const token = jwt.sign(
+    //   { id: savedUser.id },
+    //   config.get('jwtSecret'),
+    //   { expiresIn: config.get('tokenExpire') }
+    // );
 
     res.json({
       token,
@@ -88,10 +92,11 @@ router.post('/login', async (req, res) => {
           { id: user.id },
           config.get('jwtSecret'),
           { expiresIn: config.get('tokenExpire') },
-          (err, token) => {
+          (err, refesh) => {
             if (err) throw err;
             res.json({
-              token,
+              token:user.token,
+              refesh,
               user: {
                 id: user.id,
                 name: user.first_name, // Assurez-vous que vos propriétés sont correctes ici
@@ -113,13 +118,18 @@ router.post('/login', async (req, res) => {
 });
 
 
-// Route pour obtenir un utilisateur par son ID
-router.get('/:userId', async (req, res) => {
-  try {
-    const userId = req.params.userId;
 
-    // Recherche de l'utilisateur dans la base de données par ID
-    const user = await User.findById(userId);
+router.get('/getuser', async (req, res) => {
+  try {
+    // Extract the token from the Authorization header
+    const tokenget = req.headers['authorization'];
+    const token =tokenget.replace('Bearer ', '').replace('JWT ', '')
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized - Missing token' });
+    }
+
+    // Recherche de l'utilisateur dans la base de données par le champ 'token'
+    const user = await User.findOne({ token: token });
 
     if (!user) {
       return res.status(404).json({ error: 'Utilisateur non trouvé' });
@@ -137,8 +147,15 @@ router.get('/:userId', async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Erreur Serveur' });
+
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Unauthorized - Token has expired' });
+    }
+
+    return res.status(401).json({ error: 'Unauthorized - Invalid token' });
   }
 });
+
+
 
 module.exports = router;
