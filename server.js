@@ -20,7 +20,7 @@ mongoose
 
 // app.use("/api/auth", auth);
 app.use("/api/user/", users);
-app.use("/api/posts", posts);
+app.use("/api/admin", posts);
 app.use("/api/applications", applications);
 
 const port = process.env.PORT || 8000;
