@@ -82,3 +82,41 @@ router.post('/DownloadPDF', upload.single('file'), (req, res) => {
 });
 
 module.exports = router;
+
+
+
+router.get('/specialjoblist', async (req, res) => {
+  try {
+    const tokenget = req.headers['authorization'];
+    const token =tokenget.replace('Bearer ', '').replace('JWT ', '')
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized - Missing token' });
+    }
+
+    // Recherche de l'utilisateur dans la base de données par le champ 'token'
+    const user = await User.findOne({ token: token });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+    const category = user.categoryy
+    // Recherche de tous les postes avec la catégorie correspondante
+    const posts = await Post.find({ category: category });
+
+    // Renvoie la liste des postes
+    res.json({
+      posts: posts,
+    });
+    
+  } catch (error) {
+    console.error(error);
+
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Unauthorized - Token has expired' });
+    }
+
+    return res.status(401).json({ error: 'Unauthorized - Invalid token' });
+  }
+});
+
+module.exports = router;
