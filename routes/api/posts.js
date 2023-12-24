@@ -88,7 +88,8 @@ module.exports = router;
 router.get('/specialjoblist', async (req, res) => {
   try {
     const tokenget = req.headers['authorization'];
-    const token =tokenget.replace('Bearer ', '').replace('JWT ', '')
+    const token = tokenget.replace('Bearer ', '').replace('JWT ', '');
+
     if (!token) {
       return res.status(401).json({ error: 'Unauthorized - Missing token' });
     }
@@ -99,15 +100,30 @@ router.get('/specialjoblist', async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'Utilisateur non trouvé' });
     }
-    const category = user.categoryy
+
+    const category = user.categoryy;
+
     // Recherche de tous les postes avec la catégorie correspondante
     const posts = await Post.find({ category: category });
 
-    // Renvoie la liste des postes
-    res.json({
-      posts: posts,
+    // Formater la réponse pour correspondre au format souhaité
+    const formattedPosts = posts.map(post => {
+      return {
+        id: post.id,
+        author: post.author,
+        company: post.company,
+        title: post.title,
+        excerpt: post.excerpt,
+        category: post.category,
+        content: post.content,
+        status: post.status,
+        published: post.published
+      };
     });
-    
+
+    // Renvoie la liste des postes formatée
+    res.json(formattedPosts);
+
   } catch (error) {
     console.error(error);
 
@@ -118,5 +134,6 @@ router.get('/specialjoblist', async (req, res) => {
     return res.status(401).json({ error: 'Unauthorized - Invalid token' });
   }
 });
+
 
 module.exports = router;
