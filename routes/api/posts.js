@@ -249,7 +249,27 @@ router.get('/edit/postdetail/:postId', async (req, res) => {
   }
 });
 
-module.exports = router;
+router.put('/edit/:Id', async (req, res) => {
+  try {
+    const postId = req.params.Id;
+    const updateData = req.body;
+
+    // Mettez à jour le post dans la base de données en utilisant findOneAndUpdate
+    const updatedPost = await Post.findOneAndUpdate({ _id: postId }, updateData, { new: true });
+
+    if (!updatedPost) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Renvoie les détails du post mis à jour
+    res.json(updatedPost);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+
 
 
 module.exports = router;
