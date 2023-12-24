@@ -217,4 +217,39 @@ router.get('/getpostbyuser', async (req, res) => {
   }
 });
 
+
+router.get('/edit/postdetail/:postId', async (req, res) => {
+  try {
+    const postId = req.params.postId;
+
+    // Recherche du poste dans la base de données par ID
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    // Renvoie les détails du poste au format souhaité
+    const formattedResponse = {
+      id: post._id,
+      author: post.author,
+      company: post.company,
+      title: post.title,
+      excerpt: post.excerpt,
+      category: post.category,
+      content: post.content,
+      status: post.status,
+      published: post.published,
+    };
+
+    res.json(formattedResponse);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
+
+module.exports = router;
+
+
 module.exports = router;
