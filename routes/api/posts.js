@@ -136,4 +136,35 @@ router.get('/specialjoblist', async (req, res) => {
 });
 
 
+router.get('/allposts', async (req, res) => {
+  try {
+    // Recherche de tous les postes dans la base de données
+    const posts = await Post.find();
+
+    // Formater la réponse pour correspondre au format souhaité
+    const formattedPosts = posts.map(post => {
+      return {
+        id: post._id,
+        author: post.author,
+        company: post.company,
+        title: post.title,
+        excerpt: post.excerpt,
+        category: post.category,
+        content: post.content,
+        status: post.status,
+        published: post.published
+      };
+    });
+
+    // Renvoie la liste de tous les postes formatée
+    res.json(formattedPosts);
+
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({ error: 'Erreur Serveur' });
+  }
+});
+
+
 module.exports = router;
