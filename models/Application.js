@@ -7,7 +7,10 @@ const applicationSchema = new mongoose.Schema({
   email: String,
   resume: String,
   coverletter: String,
-  published: Boolean,
+  published: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 const Application = mongoose.model('Application', applicationSchema);

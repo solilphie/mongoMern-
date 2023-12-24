@@ -21,7 +21,7 @@ mongoose
 // app.use("/api/auth", auth);
 app.use("/api/user/", users);
 app.use("/api/admin", posts);
-app.use("/api/applications", applications);
+app.use("/api/apply", applications);
 
 const port = process.env.PORT || 8000;
 app.listen(port, () => console.log(`Server running on port ${port}`));

@@ -3,3 +3,4 @@ npm install bcrypt
 npm install express-validator
 npm install mongoose
 npm install multer
+npm install multer body-parser
