@@ -76,5 +76,32 @@ router.post('/', upload.single('resume'), async (req, res) => {
   }
 });
 
+// Route pour lister les applications par jobid
+router.get('/applications/:jobid', async (req, res) => {
+  try {
+    const jobid = req.params.jobid;
+
+    // Recherche des applications dans la base de données par jobid
+    const applications = await Application.find({ jobid });
+
+    // Formate la réponse selon le format souhaité
+    const formattedApplications = applications.map(application => ({
+      id: application._id,
+      author: application.author,
+      jobid: application.jobid,
+      name: application.name,
+      email: application.email,
+      resume: application.resume,
+      coverletter: application.coverletter,
+      published: application.published,
+    }));
+
+    // Renvoie la liste des applications
+    res.json(formattedApplications);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server Error' });
+  }
+});
 
 module.exports = router;
