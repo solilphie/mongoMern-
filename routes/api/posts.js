@@ -167,4 +167,54 @@ router.get('/allposts', async (req, res) => {
 });
 
 
+router.get('/getpostbyuser', async (req, res) => {
+  try {
+    const tokenget = req.headers['authorization'];
+    const token = tokenget.replace('Bearer ', '').replace('JWT ', '');
+
+    if (!token) {
+      return res.status(401).json({ error: 'Unauthorized - Missing token' });
+    }
+
+    // Recherche de l'utilisateur dans la base de données par le champ 'token'
+    const user = await User.findOne({ token: token });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Utilisateur non trouvé' });
+    }
+
+    const author = user.id;
+
+    // Recherche de tous les postes avec la catégorie correspondante
+    const posts = await Post.find({ author: author });
+
+    // Formater la réponse pour correspondre au format souhaité
+    const formattedPosts = posts.map(post => {
+      return {
+        id: post.id,
+        author: post.author,
+        company: post.company,
+        title: post.title,
+        excerpt: post.excerpt,
+        category: post.category,
+        content: post.content,
+        status: post.status,
+        published: post.published
+      };
+    });
+
+    // Renvoie la liste des postes formatée
+    res.json(formattedPosts);
+
+  } catch (error) {
+    console.error(error);
+
+    if (error.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Unauthorized - Token has expired' });
+    }
+
+    return res.status(401).json({ error: 'Unauthorized - Invalid token' });
+  }
+});
+
 module.exports = router;
