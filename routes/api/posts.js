@@ -9,6 +9,7 @@ const multer = require('multer');
 const storage = multer.memoryStorage(); // Stocke les fichiers en mémoire
 // Configurez multer avec le stockage
 const upload = multer({ storage: storage });
+const fsP = require('fs').promises;  // Use fs.promises for asynchronous file operations
 
 // @route POST api/posts
 // @desc Register new post
@@ -64,24 +65,28 @@ router.delete('/delete/:postId', async (req, res) => {
   }
 });
 
-router.post('/DownloadPDF', upload.single('file'), (req, res) => {
-  try {
-    // Obtenez le fichier depuis req.file.buffer
-    const fileBuffer = req.file.buffer;
-    const filename = req.file.originalname
-    // Faites quelque chose avec le fichier, par exemple, enregistrez-le dans un répertoire
-    const filePath = path.join(config.get("path_file"), filename);
-    fs.writeFileSync(filePath, fileBuffer);
 
-    // Répondez au client avec une confirmation
+router.post('/DownloadPDF', async (req, res) => {
+  try {
+    const filePath = req.body.filePath;
+    const filename = path.basename(filePath);
+
+    // Read the file asynchronously to get the file buffer
+    const fileBuffer = await fsP.readFile(filePath);
+
+    // Assuming config.get("path_download") is a valid path
+    const file = path.join(config.get("path_download"), filename);
+
+    // Write the file buffer to the specified file path
+    await fsP.writeFile(file, fileBuffer);
+
+    // Respond to the client with a confirmation
     res.json({ message: 'File uploaded successfully' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: 'Server Error' });
+    res.status(500).json({ error: 'File not found' });
   }
 });
-
-module.exports = router;
 
 
 

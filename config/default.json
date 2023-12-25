@@ -4,5 +4,6 @@
   "mongo_url": "mongodb://localhost:27017/tp1",
   "jwtSecret":"jwtSecret",
   "tokenExpire":"52222555",
-  "path_file":"/home/hp/2s1/fullstackweb/mongoMern-/pdf/"
+  "path_file":"/home/hp/2s1/fullstackweb/mongoMern-/pdf/",
+  "path_download":"/home/hp/Téléchargements"
 }
